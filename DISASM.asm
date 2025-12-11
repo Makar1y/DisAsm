@@ -4,20 +4,19 @@
 CRET = 13
 CF = 10
 
-
 .data
 
-    welcome_message db ' ----------------------------------------------------------', CRET, CF
-                    db '|                                                          |', CRET, CF
-                    db '|               Author - Makariy Sinyavskiy                |', CRET, CF
-                    db '|                                                          |', CRET, CF
-                    db '|                  Disassembler program                    |', CRET, CF
-                    db '|                                                          |', CRET, CF
-                    db ' ----------------------------------------------------------', CRET, CF, CF,'$'
+    welcome_message      db ' ----------------------------------------------------------', CRET, CF
+                         db '|                                                          |', CRET, CF
+                         db '|               Author - Makariy Sinyavskiy                |', CRET, CF
+                         db '|                                                          |', CRET, CF
+                         db '|                  Disassembler program                    |', CRET, CF
+                         db '|                                                          |', CRET, CF
+                         db ' ----------------------------------------------------------', CRET, CF, CF,'$'
 
 
     input_filename       db 20 dup(?), '$'
-    input                dw ?                                                         ; Descriptor
+    input                dw ?          ; Descriptor
 
     output_filename      db 20 dup(?), '$'
     output               dw ?
@@ -41,6 +40,10 @@ CF = 10
                     mov  ax, @data
                     mov  ds, ax
 
+                    mov  ah, 09h
+                    mov  dx, offset welcome_message
+                    int  21h
+
                     call CL_PARAMS_READ
                     cmp  al, 1
                     jne  OPEN_FILES
@@ -52,7 +55,7 @@ CF = 10
                     jmp  EXIT
 
     OPEN_FILES:     
-    ; Open input
+        ; Open input
                     mov  ah, 3dh
                     mov  al, 00h
                     mov  dx, offset input_filename
@@ -61,10 +64,10 @@ CF = 10
                     call OPEN_ERROR
 
     NEXT1:          
-    ; Save file descriptor
+        ; Save file descriptor
                     mov  [input], ax
 
-    ; Create and open output file
+        ; Create and open output file
                     mov  ah, 5Bh
                     mov  cx, 00h
                     mov  dx, offset output_filename
@@ -79,13 +82,13 @@ CF = 10
 
 
 
-                    
+
 
     ; READ FILE LOOP
     READ_LOOP:      
                     mov  ah, 3Fh                            ; Read from file
                     mov  bx, [input]                        ; File handle
-                    mov  cx, 8                              ; Number of bytes to read
+                    mov  cx, 1                              ; Number of bytes to read
                     mov  dx, offset buffer
                     int  21h
     
@@ -94,9 +97,8 @@ CF = 10
                     cmp  ax, 0                              ; Check if 0 bytes read (EOF)
                     je   EXIT                               ; If EOF, exit
 
-    ; AX contains the number of bytes read
-    ; TODO: Process the buffer here
-    ; call PROCESS_BUFFER
+                    mov  al, buffer
+                    call FIRST_BYTE
     
                     jmp  READ_LOOP                          ; Continue reading
 
@@ -105,10 +107,10 @@ CF = 10
 
 
     EXIT:           
-    ; save error code
+        ; save error code
                     push ax
 
-    ; Close files if opened
+        ; Close files if opened
                     mov  ah, 3Eh
                     mov  bx, [input]
                     int  21h
@@ -194,7 +196,7 @@ OPEN_ERROR ENDP
     ; --------------------------------------------------------------------
 CL_PARAMS_READ PROC
                     mov  si, 80h                            ; CL length
-                    mov  cl, ds:[si]
+                    mov  cl, es:[si]
                     cmp  cl, 0
                     je   ERR_RET                            ; no params
 
@@ -204,7 +206,8 @@ CL_PARAMS_READ PROC
                     call SKIP_SPACES
                     mov  di, offset input_filename
                     call READ_WORD
-                    mov  [di], '0$'                         ; EOS
+                    mov  byte ptr [di], 0                   ; Null terminator for open file (3Dh)
+                    mov  byte ptr [di+1], '$'               ; $ terminator for print string (09h)
 
                     cmp  cx, 0
                     je   ERR_RET
@@ -213,7 +216,8 @@ CL_PARAMS_READ PROC
                     call SKIP_SPACES
                     mov  di, offset output_filename
                     call READ_WORD
-                    mov  [di], '0$'                         ; EOS
+                    mov  byte ptr [di], 0                   ; Null terminator for create file (3Ch/5Bh)
+                    mov  byte ptr [di+1], '$'               ; $ terminator for print string (09h)
 
                     cmp  cx, 0
                     je   ERR_RET
@@ -246,7 +250,7 @@ SKIP_SPACES ENDP
     ; Return -> jump back
     ; --------------------------------------------------------------------
 READ_WORD PROC
-    READ_WORD_LOOP:      
+    READ_WORD_LOOP: 
                     mov  al, es:[si]
                     cmp  al, ' '
                     je   READ_WORD_DONE
@@ -257,8 +261,15 @@ READ_WORD PROC
                     inc  si
                     inc  cx
                     jmp  READ_WORD_LOOP
-    READ_WORD_DONE:      
+    READ_WORD_DONE: 
                     ret
 READ_WORD ENDP
+
+; --------------------------------------------------------------------
+; Check first byte of command (al)
+; --------------------------------------------------------------------
+FIRST_BYTE PROC
+    cmp al, 10001000b
+FIRST_BYTE ENDP
 
 end program
