@@ -6,9 +6,10 @@ BSeg SEGMENT
 	         ORG    100h
 	         ASSUME ds:BSeg, cs:BSeg, ss:BSeg
 
-	Pradzia: 
+	Pradzia:
 	         MOV    ax, cs
 	         MOV    ds, ax
+
 	;****nuskaito eilute****
 	         MOV    ah, 9
 	         MOV    dx, offset ivesk
@@ -31,9 +32,9 @@ BSeg SEGMENT
 	         MOV    dh, 'Z'
 
 	ciklas1: 
-	         CMP    dl, ds:[bx]
+	         CMP    dl, [bx]
 	         JG     nelygu
-	         CMP    dh, ds:[bx]
+	         CMP    dh, [bx]
 	         JL     nelygu
 	         INC    ax
 
