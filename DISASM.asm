@@ -9,34 +9,33 @@ CF = 10
 print_reg_reg MACRO command, reg1, reg2
 
 mov cx, 6
-push cx
+
                 mov dx, offset command
                 mov ah, 40h
                 mov bx, [output]
                 int 21h
 
-mov cx, 1
+
                 mov ah, 40h
                 mov bx, [output]
                 mov dx, offset space
                 int 21h
-pop cx
-push cx
+
                 mov dx, offset reg1
                 mov ah, 40h
                 mov bx, [output]
                 int 21h
-mov cx, 1
+
                 mov ah, 40h
                 mov bx, [output]
                 mov dx, offset comma
                 int 21h
-pop cx
+
                 mov dx, offset reg2
                 mov ah, 40h
                 mov bx, [output]
                 int 21h
-mov cx, 2
+
                 mov ah, 40h
                 mov bx, [output]
                 mov dx, offset new_line
@@ -45,38 +44,32 @@ ENDM
 
 print_reg_label MACRO command, reg, w
 mov cx, 6
-push cx
+
                     mov dx, offset command
                     mov ah, 40h
                     mov bx, [output]
-                    int 21h
-mov cx, 1
-                    mov ah, 40h
-                    mov bx, [output]
-                    lea dx, space
-                    int 21h
-pop cx
-push cx
-                    lea dx, reg
-                    mov ah, 40h
-                    mov bx, [output]
-                    int 21h
-mov cx, 1
-                    mov ah, 40h
-                    mov bx, [output]
-                    lea dx, comma
                     int 21h
 
                     mov ah, 40h
                     mov bx, [output]
                     lea dx, space
                     int 21h
-pop cx
+
+                    lea dx, reg
+                    mov ah, 40h
+                    mov bx, [output]
+                    int 21h
+
+                    mov ah, 40h
+                    mov bx, [output]
+                    lea dx, comma
+                    int 21h
+
                     lea dx, labels
                     mov ah, 40h
                     mov bx, [output]
                     int 21h
-mov cx, 2
+
                     mov ah, 40h
                     mov bx, [output]
                     lea dx, new_line
@@ -85,39 +78,32 @@ ENDM
 
 print_label_reg MACRO command, reg, w
 mov cx, 6
-push cx
+
                     lea dx, command
                     mov ah, 40h
                     mov bx, [output]
                     int 21h
-mov cx, 1
+
                     mov ah, 40h
                     mov bx, [output]
                     lea dx, space
                     int 21h
-pop cx
-push cx
+
                     lea dx, labels
                     mov ah, 40h
                     mov bx, [output]
                     int 21h
-mov cx, 1
+
                     mov ah, 40h
                     mov bx, [output]
                     lea dx, comma
                     int 21h
-                    
-                    mov ah, 40h
-                    mov bx, [output]
-                    lea dx, space
-                    int 21h
-pop cx
-push cx
+
                     lea dx, reg
                     mov ah, 40h
                     mov bx, [output]
                     int 21h
-mov cx, 2
+
                     mov ah, 40h
                     mov bx, [output]
                     lea dx, new_line
@@ -161,9 +147,9 @@ ENDM
     already_exist_err    db ' -> ERROR: file already exist!',13,10,'$'
 
 
-    space                db ' ', '$'
-    comma                db ',', '$'
-    new_line             db 13,10,'$'
+    space                db '      '
+    comma                db ',     '
+    new_line             db 13,10,'    '
 
     ; Registers
     reg_000              db 'AX    ', 'AL    '
