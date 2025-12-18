@@ -4,98 +4,123 @@
 CRET = 13
 CF = 10
 
+; TODO: Add width check
+
 print_reg_reg MACRO command, reg1, reg2
-                  lea dx, command
-                  mov ah, 09h
-                  int 21h
 
-                  mov ah, 02h
-                  mov dl, ' '
-                  int 21h
+mov cx, 6
+push cx
+                mov dx, offset command
+                mov ah, 40h
+                mov bx, [output]
+                int 21h
 
-                  lea dx, reg1
-                  mov ah, 09h
-                  int 21h
-
-                  mov ah, 02h
-                  mov dl, ','
-                  int 21h
-
-                  lea dx, reg2
-                  mov ah, 09h
-                  int 21h
-
-                  mov ah, 02h
-                  mov dl, 10
-                  int 21h
-
-                  mov dl, 13
-                  int 21h
+mov cx, 1
+                mov ah, 40h
+                mov bx, [output]
+                mov dx, offset space
+                int 21h
+pop cx
+push cx
+                mov dx, offset reg1
+                mov ah, 40h
+                mov bx, [output]
+                int 21h
+mov cx, 1
+                mov ah, 40h
+                mov bx, [output]
+                mov dx, offset comma
+                int 21h
+pop cx
+                mov dx, offset reg2
+                mov ah, 40h
+                mov bx, [output]
+                int 21h
+mov cx, 2
+                mov ah, 40h
+                mov bx, [output]
+                mov dx, offset new_line
+                int 21h
 ENDM
 
 print_reg_label MACRO command, reg, w
-                    lea dx, command
-                    mov ah, 09h
+mov cx, 6
+push cx
+                    mov dx, offset command
+                    mov ah, 40h
+                    mov bx, [output]
                     int 21h
-
-                    mov ah, 02h
-                    mov dl, ' '
+mov cx, 1
+                    mov ah, 40h
+                    mov bx, [output]
+                    lea dx, space
                     int 21h
-
+pop cx
+push cx
                     lea dx, reg
-                    mov ah, 09h
+                    mov ah, 40h
+                    mov bx, [output]
+                    int 21h
+mov cx, 1
+                    mov ah, 40h
+                    mov bx, [output]
+                    lea dx, comma
                     int 21h
 
-                    mov ah, 02h
-                    mov dl, ','
+                    mov ah, 40h
+                    mov bx, [output]
+                    lea dx, space
                     int 21h
-
-                    mov ah, 02h
-                    mov dl, ' '
-                    int 21h
-
+pop cx
                     lea dx, labels
-                    mov ah, 09h
+                    mov ah, 40h
+                    mov bx, [output]
                     int 21h
-
-                    mov ah, 02h
-                    mov dl, 10
-                    int 21h
-
-                    mov dl, 13
+mov cx, 2
+                    mov ah, 40h
+                    mov bx, [output]
+                    lea dx, new_line
                     int 21h
 ENDM
 
 print_label_reg MACRO command, reg, w
+mov cx, 6
+push cx
                     lea dx, command
-                    mov ah, 09h
+                    mov ah, 40h
+                    mov bx, [output]
                     int 21h
-
-                    mov ah, 02h
-                    mov dl, ' '
+mov cx, 1
+                    mov ah, 40h
+                    mov bx, [output]
+                    lea dx, space
                     int 21h
-
+pop cx
+push cx
                     lea dx, labels
-                    mov ah, 09h
+                    mov ah, 40h
+                    mov bx, [output]
                     int 21h
-
-                    mov ah, 02h
-                    mov dl, ','
+mov cx, 1
+                    mov ah, 40h
+                    mov bx, [output]
+                    lea dx, comma
                     int 21h
                     
-                    mov ah, 02h
-                    mov dl, ' '
+                    mov ah, 40h
+                    mov bx, [output]
+                    lea dx, space
                     int 21h
-
+pop cx
+push cx
                     lea dx, reg
-                    mov ah, 09h
+                    mov ah, 40h
+                    mov bx, [output]
                     int 21h
-
-                    mov ah, 02h
-                    mov dl, 10
-                    int 21h
-
-                    mov dl, 13
+mov cx, 2
+                    mov ah, 40h
+                    mov bx, [output]
+                    lea dx, new_line
                     int 21h
 ENDM
 
@@ -106,6 +131,13 @@ ENDM
                          db '|               Author - Makariy Sinyavskiy                |', CRET, CF
                          db '|                                                          |', CRET, CF
                          db '|                  Disassembler program                    |', CRET, CF
+                         db '|                                                          |', CRET, CF
+                         db ' ----------------------------------------------------------', CRET, CF, CF,'$'
+
+
+    out_message          db ' ----------------------------------------------------------', CRET, CF
+                         db '|                                                          |', CRET, CF
+                         db '|                  Program finished, Bye bye!              |', CRET, CF
                          db '|                                                          |', CRET, CF
                          db ' ----------------------------------------------------------', CRET, CF, CF,'$'
 
@@ -128,40 +160,45 @@ ENDM
     incorrect_access_err db ' -> ERROR: incorrect access mode!',13,10,'$'
     already_exist_err    db ' -> ERROR: file already exist!',13,10,'$'
 
+
+    space                db ' ', '$'
+    comma                db ',', '$'
+    new_line             db 13,10,'$'
+
     ; Registers
-    reg_000              db 'AX', '$', 'AL', '$'
-    reg_001              db 'CX', '$', 'CL', '$'
-    reg_010              db 'DX', '$', 'DL', '$'
-    reg_011              db 'BX', '$', 'BL', '$'
-    reg_100              db 'AH', '$', 'SP', '$'
-    reg_101              db 'CH', '$', 'BP', '$'
-    reg_110              db 'DH', '$', 'SI', '$'
-    reg_111              db 'BH', '$', 'DI', '$'
+    reg_000              db 'AX    ', 'AL    '
+    reg_001              db 'CX    ', 'CL    '
+    reg_010              db 'DX    ', 'DL    '
+    reg_011              db 'BX    ', 'BL    '
+    reg_100              db 'AH    ', 'SP    '
+    reg_101              db 'CH    ', 'BP    '
+    reg_110              db 'DH    ', 'SI    '
+    reg_111              db 'BH    ', 'DI    '
 
     ; Commands
-    command_MOV          db 'MOV', '$'
-    command_ADD          db 'ADD', '$'
-    command_SUB          db 'SUB', '$'
-    command_MUL          db 'MUL', '$'
-    command_DIV          db 'DIV', '$'
-    command_AND          db 'AND', '$'
-    command_OR           db 'OR', '$'
-    command_XOR          db 'XOR', '$'
-    command_NOT          db 'NOT', '$'
-    command_SHL          db 'SHL', '$'
-    command_SHR          db 'SHR', '$'
-    command_JMP          db 'JMP', '$'
-    command_JE           db 'JE', '$'
-    command_JNE          db 'JNE', '$'
-    command_JG           db 'JG', '$'
-    command_JL           db 'JL', '$'
-    command_JGE          db 'JGE', '$'
-    command_JLE          db 'JLE', '$'
-    command_CALL         db 'CALL', '$'
-    command_RET          db 'RET', '$'
-    command_HLT          db 'HLT', '$'
+    command_MOV          db 'MOV   '
+    command_ADD          db 'ADD   '
+    command_SUB          db 'SUB   '
+    command_MUL          db 'MUL   '
+    command_DIV          db 'DIV   '
+    command_AND          db 'AND   '
+    command_OR           db 'OR    '
+    command_XOR          db 'XOR   '
+    command_NOT          db 'NOT   '
+    command_SHL          db 'SHL   '
+    command_SHR          db 'SHR   '
+    command_JMP          db 'JMP   '
+    command_JE           db 'JE    '
+    command_JNE          db 'JNE   '
+    command_JG           db 'JG    '
+    command_JL           db 'JL    '
+    command_JGE          db 'JGE   '
+    command_JLE          db 'JLE   '
+    command_CALL         db 'CALL  '
+    command_RET          db 'RET   '
+    command_HLT          db 'HLT   '
 
-    labels               db 'label', '$'                                                                       ; 1024 dup('$')
+    labels               db 'label '
 
 .code
     program:        
@@ -214,20 +251,22 @@ ENDM
 
 
     ; READ FILE LOOP
+    ; READ FILE LOOP
     READ_LOOP:      
                     mov             ah, 3Fh                            ; Read from file
                     mov             bx, [input]                        ; File handle
-                    mov             cx, 1                              ; Number of bytes to read
+                    mov             cx, 2                              ; Number of bytes to read
                     mov             dx, offset buffer
                     int             21h
     
                     jc              READ_ERROR                         ; Jump if error
     
-                    cmp             ax, 0                              ; Check if 0 bytes read (EOF)
-                    je              EXIT                               ; If EOF, exit
+                    cmp             ax, 2                              ; Check if 2 bytes read
+                    jne             EXIT                               ; If not 2 bytes, exit (EOF or partial)
 
-                    mov             al, buffer
-                    call            FIRST_BYTE
+                    mov             ah, buffer
+                    mov             al, buffer+1
+                    call            DISASM
     
                     jmp             READ_LOOP                          ; Continue reading
 
@@ -246,6 +285,10 @@ ENDM
                     mov             ah, 3Eh
                     mov             bx, [output]
                     int             21h
+
+                    mov             ah, 09h
+                    mov             dx, offset out_message
+                    int             21h 
 
                     pop             ax
                     mov             ah, 4Ch
@@ -397,7 +440,7 @@ READ_WORD ENDP
     ; --------------------------------------------------------------------
     ; Check first byte of command (al)
     ; --------------------------------------------------------------------
-FIRST_BYTE PROC
+DISASM PROC
     ; MOV 1
     ; mod 00, d 0, w 0,
                     cmp             ax, 8800h                          ; 100010 00 00 000 000
@@ -565,7 +608,8 @@ FIRST_BYTE PROC
     
     
     EXIT_FIRST_BYTE:
-FIRST_BYTE ENDP
+                    ret
+DISASM ENDP
 
 
 
